@@ -1,0 +1,23 @@
+package static
+
+import "github.com/RykoL/uptime-probe/internal/monitor"
+
+templ Monitor(monitor monitor.Monitor) {
+	<div>
+		<h2>{ monitor.Name }</h2>
+		@MonitorStatus(monitor.Status())
+	</div>
+}
+
+templ MonitorStatus(status monitor.Status) {
+    switch status {
+        case monitor.StatusUp:
+            <span>Up</span>
+        case monitor.StatusUnknown:
+            <span>Unknown</span>
+        case monitor.StatusPending:
+            <span>Pending</span>
+        default:
+            <span>Down</span>
+    }
+}

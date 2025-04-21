@@ -1,6 +1,14 @@
 build:
     go build cmd/main.go
 
+generate:
+    templ generate
 
-test:
+clean:
+    rm ./main
+
+run: build generate
+    ./main
+
+test: generate
     go test ./...
