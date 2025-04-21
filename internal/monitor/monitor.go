@@ -16,8 +16,8 @@ type Monitor struct {
 	historicalData []probe.Result
 }
 
-func NewMonitor(name string) *Monitor {
-	return &Monitor{
+func NewMonitor(name string) Monitor {
+	return Monitor{
 		Name:           name,
 		historicalData: make([]probe.Result, 0),
 	}
@@ -34,4 +34,19 @@ func (m *Monitor) Status() Status {
 	}
 
 	return StatusDown
+}
+
+func (s Status) String() string {
+	switch s {
+	case StatusUp:
+		return "Up"
+	case StatusUnknown:
+		return "Unknown"
+	case StatusPending:
+		return "Pending"
+	case StatusDown:
+		return "Down"
+	default:
+		return "Error: This status doesn't exists"
+	}
 }

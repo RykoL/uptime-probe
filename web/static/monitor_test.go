@@ -9,7 +9,7 @@ import (
 
 func TestRendersMonitorName(t *testing.T) {
 	m := monitor.NewMonitor("SomeMonitor")
-	comp := testutils.RenderComponent(Monitor(*m))
+	comp := testutils.RenderComponent(Monitor(m))
 
 	assert.Equal(t, "SomeMonitor", comp.Find(`h2`).Text())
 }

@@ -3,21 +3,25 @@ package static
 import "github.com/RykoL/uptime-probe/internal/monitor"
 
 templ Monitor(monitor monitor.Monitor) {
-	<div>
+	<div class="monitor">
 		<h2>{ monitor.Name }</h2>
 		@MonitorStatus(monitor.Status())
 	</div>
 }
 
 templ MonitorStatus(status monitor.Status) {
+    <span class={"pill", getStatusPageBackground(status)}>{status.String()}</span>
+}
+
+func getStatusPageBackground(status monitor.Status) string {
     switch status {
         case monitor.StatusUp:
-            <span>Up</span>
-        case monitor.StatusUnknown:
-            <span>Unknown</span>
+            return "pill-green"
+        case monitor.StatusDown:
+            return "pill-red"
         case monitor.StatusPending:
-            <span>Pending</span>
+            return "pill-amber"
         default:
-            <span>Down</span>
+            return "pill-blue"
     }
 }
