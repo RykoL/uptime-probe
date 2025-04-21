@@ -1,12 +1,12 @@
 package probe_test
 
 import (
+	"github.com/RykoL/uptime-probe/internal/probe"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
-	"uptime-probe/internal/probe"
 )
 
 func server() *httptest.Server {

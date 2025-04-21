@@ -1,4 +1,4 @@
-module uptime-probe
+module github.com/RykoL/uptime-probe
 
 go 1.24.2
 
