@@ -20,7 +20,7 @@ This Go application provides a basic blackbox monitoring solution for HTTP servi
 
 1.  Clone the repository:
     ```bash
-    git clone [https://github.com/RykoL/uptime-probe](https://github.com/RykoL/uptime-probe)
+    git clone https://github.com/RykoL/uptime-probe
     cd uptime-probe
     ```
 
@@ -38,10 +38,10 @@ This Go application provides a basic blackbox monitoring solution for HTTP servi
     ```yaml
     targets:
       - name: My Website
-        url: [https://www.example.com](https://www.example.com)
+        url: https://www.example.com
         interval: 60 # Interval in seconds
       - name: My API
-        url: [https://api.example.com/health](https://api.example.com/health)
+        url: https://api.example.com/health
         interval: 30
       - name: Another Service
         url: http://localhost:8080
