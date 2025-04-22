@@ -11,11 +11,17 @@ templ Monitor(monitor monitor.Monitor) {
 				@MonitorStatus(monitor.Status())
 			</div>
 		</section>
-		<div class="probe-status-display">
-			for i := 1; i <= 30; i++ {
-				@ProbeStatusPill()
-			}
-		</div>
+		<section class="probe-status">
+			<div class="probe-status-display">
+				for i := 1; i <= 30; i++ {
+					@ProbeStatusPill()
+				}
+			</div>
+			<div class="probe-status-time-info">
+			    <span>30min ago</span>
+			    <span>now</span>
+			</div>
+		</section>
 	</div>
 }
 
