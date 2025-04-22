@@ -1,4 +1,4 @@
-build:
+build: generate
 	go build cmd/main.go
 
 generate:
