@@ -1,15 +1,15 @@
 package static
 
-import "github.com/RykoL/uptime-probe/internal/monitor"
+import "github.com/RykoL/uptime-probe/web/model"
 
-templ Index(monitors []monitor.Monitor) {
+templ Index(monitors []model.Monitor) {
 	@Layout() {
 		<main>
 			<h1 id="monitors-heading">Monitors</h1>
 			if len(monitors) == 0 {
 				<p>No monitors created yet.</p>
 			}
-			<div class="monitor-list">
+			<div id="monitors-list">
 				for _, monitor := range monitors {
 					@Monitor(monitor)
 				}

@@ -1,20 +1,20 @@
 package static
 
-import "github.com/RykoL/uptime-probe/internal/monitor"
+import "github.com/RykoL/uptime-probe/web/model"
 
-templ Monitor(monitor monitor.Monitor) {
+templ Monitor(monitor model.Monitor) {
 	<div class="monitor">
 		<section class="monitor-info">
 			<h2 class="monitor-info-name">{ monitor.Name }</h2>
 			<div class="monitor-info-status">
 				Status:
-				@MonitorStatus(monitor.Status())
+				@MonitorStatus(monitor.Status)
 			</div>
 		</section>
 		<section class="probe-status">
 			<div class="probe-status-display">
 				for i := 1; i <= 30; i++ {
-					@ProbeStatusPill()
+					@ProbeStatusPill(monitor.Status)
 				}
 			</div>
 			<div class="probe-status-time-info">
@@ -25,23 +25,23 @@ templ Monitor(monitor monitor.Monitor) {
 	</div>
 }
 
-templ ProbeStatusPill() {
-	<div class="probe-status-pill pill-gray"></div>
+templ ProbeStatusPill(status string) {
+	<div class={"probe-status-pill", getStatusPageBackground(status)}></div>
 }
 
-templ MonitorStatus(status monitor.Status) {
-	<span class={ "pill", getStatusPageBackground(status) }>{ status.String() }</span>
+templ MonitorStatus(status string) {
+	<span class={ "pill", getStatusPageBackground(status) }>{ status }</span>
 }
 
-func getStatusPageBackground(status monitor.Status) string {
+func getStatusPageBackground(status string) string {
 	switch status {
-	case monitor.StatusUp:
+	case "Up":
 		return "pill-green"
-	case monitor.StatusDown:
+	case "Down":
 		return "pill-red"
-	case monitor.StatusPending:
+	case "Pending":
 		return "pill-amber"
 	default:
-		return "pill-blue"
+		return "pill-gray"
 	}
 }
