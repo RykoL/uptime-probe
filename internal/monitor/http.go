@@ -1,4 +1,4 @@
-package probe
+package monitor
 
 import (
 	"net/http"
@@ -13,7 +13,7 @@ func NewHttpProbe(url *url.URL) HttpProbe {
 	return HttpProbe{url}
 }
 
-func (p *HttpProbe) Execute() (*Result, error) {
+func (p *HttpProbe) Execute() (*ProbeResult, error) {
 	resp, err := http.Get(p.url.String())
 
 	if err != nil {
@@ -23,8 +23,8 @@ func (p *HttpProbe) Execute() (*Result, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusOK {
-		return &Result{Status: StatusSucceed}, nil
+		return &ProbeResult{Status: StatusSucceed}, nil
 	}
 
-	return &Result{Status: StatusFailed}, nil
+	return &ProbeResult{Status: StatusFailed}, nil
 }

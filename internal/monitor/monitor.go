@@ -1,7 +1,5 @@
 package monitor
 
-import "github.com/RykoL/uptime-probe/internal/probe"
-
 type Status int
 
 const (
@@ -13,13 +11,15 @@ const (
 
 type Monitor struct {
 	Name           string
-	historicalData []probe.Result
+	Probe          Probe
+	historicalData []ProbeResult
 }
 
-func NewMonitor(name string) Monitor {
-	return Monitor{
+func NewMonitor(name string, probe Probe) *Monitor {
+	return &Monitor{
 		Name:           name,
-		historicalData: make([]probe.Result, 0),
+		Probe:          probe,
+		historicalData: make([]ProbeResult, 0),
 	}
 }
 
@@ -29,7 +29,7 @@ func (m *Monitor) Status() Status {
 		return StatusUnknown
 	}
 
-	if m.historicalData[len(m.historicalData)-1].Status == probe.StatusSucceed {
+	if m.historicalData[len(m.historicalData)-1].Status == StatusSucceed {
 		return StatusUp
 	}
 
