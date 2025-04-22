@@ -4,24 +4,38 @@ import "github.com/RykoL/uptime-probe/internal/monitor"
 
 templ Monitor(monitor monitor.Monitor) {
 	<div class="monitor">
-		<h2>{ monitor.Name }</h2>
-		@MonitorStatus(monitor.Status())
+		<section class="monitor-info">
+			<h2 class="monitor-info-name">{ monitor.Name }</h2>
+			<div class="monitor-info-status">
+				Status:
+				@MonitorStatus(monitor.Status())
+			</div>
+		</section>
+		<div class="probe-status-display">
+			for i := 1; i <= 30; i++ {
+				@ProbeStatusPill()
+			}
+		</div>
 	</div>
 }
 
+templ ProbeStatusPill() {
+	<div class="probe-status-pill pill-gray"></div>
+}
+
 templ MonitorStatus(status monitor.Status) {
-    <span class={"pill", getStatusPageBackground(status)}>{status.String()}</span>
+	<span class={ "pill", getStatusPageBackground(status) }>{ status.String() }</span>
 }
 
 func getStatusPageBackground(status monitor.Status) string {
-    switch status {
-        case monitor.StatusUp:
-            return "pill-green"
-        case monitor.StatusDown:
-            return "pill-red"
-        case monitor.StatusPending:
-            return "pill-amber"
-        default:
-            return "pill-blue"
-    }
+	switch status {
+	case monitor.StatusUp:
+		return "pill-green"
+	case monitor.StatusDown:
+		return "pill-red"
+	case monitor.StatusPending:
+		return "pill-amber"
+	default:
+		return "pill-blue"
+	}
 }
