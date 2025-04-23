@@ -1,5 +1,7 @@
 package monitor
 
+import "time"
+
 type ProbeStatus = bool
 
 const (
@@ -8,7 +10,8 @@ const (
 )
 
 type ProbeResult struct {
-	Status ProbeStatus
+	TimeStamp time.Time
+	Status    ProbeStatus
 }
 
 type Probe interface {

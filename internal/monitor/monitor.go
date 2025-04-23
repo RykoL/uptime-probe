@@ -1,5 +1,7 @@
 package monitor
 
+import "time"
+
 type Status int
 
 const (
@@ -11,14 +13,16 @@ const (
 
 type Monitor struct {
 	Name           string
-	Probe          Probe
+	Interval       time.Duration
+	probe          Probe
 	historicalData []ProbeResult
 }
 
-func NewMonitor(name string, probe Probe) *Monitor {
+func NewMonitor(name string, interval time.Duration, probe Probe) *Monitor {
 	return &Monitor{
 		Name:           name,
-		Probe:          probe,
+		Interval:       interval,
+		probe:          probe,
 		historicalData: make([]ProbeResult, 0),
 	}
 }
@@ -49,4 +53,22 @@ func (s Status) String() string {
 	default:
 		return "Error: This status doesn't exists"
 	}
+}
+
+func (m *Monitor) ShouldExecuteProbe() bool {
+	if len(m.historicalData) == 0 {
+		return true
+	}
+
+	lastExecution := m.historicalData[len(m.historicalData)-1].TimeStamp
+
+	if time.Now().Add(-m.Interval).After(lastExecution) {
+		return true
+	}
+
+	return false
+}
+
+func (m *Monitor) Probe() error {
+	return nil
 }
