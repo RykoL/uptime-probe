@@ -13,7 +13,7 @@ var oneSecond, _ = time.ParseDuration("1s")
 var oneMinute, _ = time.ParseDuration("1m")
 
 func (p *NoOpProbe) Execute() (*ProbeResult, error) {
-	return &ProbeResult{Status: true}, nil
+	return &ProbeResult{Succeeded: true}, nil
 }
 
 func TestCreatesMonitorWithName(t *testing.T) {
@@ -23,7 +23,7 @@ func TestCreatesMonitorWithName(t *testing.T) {
 
 func TestReturnsThatMonitorIsUpWhenLatestResultIsSuccessful(t *testing.T) {
 	monitor := Monitor{Name: "", historicalData: []ProbeResult{
-		{Status: StatusSucceed},
+		{Succeeded: ExecutionSucceeded},
 	}}
 
 	assert.Equal(t, Status(StatusUp), monitor.Status())
@@ -31,7 +31,7 @@ func TestReturnsThatMonitorIsUpWhenLatestResultIsSuccessful(t *testing.T) {
 
 func TestReturnsDownWhenLastResultIsAFailure(t *testing.T) {
 	monitor := Monitor{Name: "", historicalData: []ProbeResult{
-		{Status: StatusFailed},
+		{Succeeded: ExecutionFailed},
 	}}
 
 	assert.Equal(t, Status(StatusDown), monitor.Status())
@@ -55,7 +55,7 @@ func TestReturnsTrueIfLastExecutionLiesBehindInterval(t *testing.T) {
 		Name:     "asdasd",
 		Interval: oneSecond,
 		historicalData: []ProbeResult{
-			{Status: true, TimeStamp: lastExecution},
+			{Succeeded: true, TimeStamp: lastExecution},
 		},
 	}
 
@@ -68,7 +68,7 @@ func TestReturnsFalseIfLastExecutionLiesAfterInterval(t *testing.T) {
 		Name:     "asdasd",
 		Interval: oneMinute,
 		historicalData: []ProbeResult{
-			{Status: true, TimeStamp: lastExecution},
+			{Succeeded: true, TimeStamp: lastExecution},
 		},
 	}
 

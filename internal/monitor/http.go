@@ -23,8 +23,8 @@ func (p *HttpProbe) Execute() (*ProbeResult, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusOK {
-		return &ProbeResult{Status: StatusSucceed}, nil
+		return &ProbeResult{Succeeded: ExecutionSucceeded}, nil
 	}
 
-	return &ProbeResult{Status: StatusFailed}, nil
+	return &ProbeResult{Succeeded: ExecutionFailed}, nil
 }

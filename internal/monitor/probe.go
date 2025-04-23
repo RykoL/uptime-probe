@@ -2,16 +2,16 @@ package monitor
 
 import "time"
 
-type ProbeStatus = bool
+type ExecutionStatus = bool
 
 const (
-	StatusSucceed = true
-	StatusFailed  = false
+	ExecutionSucceeded = true
+	ExecutionFailed    = false
 )
 
 type ProbeResult struct {
 	TimeStamp time.Time
-	Status    ProbeStatus
+	Succeeded ExecutionStatus
 }
 
 type Probe interface {

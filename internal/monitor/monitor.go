@@ -33,7 +33,7 @@ func (m *Monitor) Status() Status {
 		return StatusUnknown
 	}
 
-	if m.historicalData[len(m.historicalData)-1].Status == StatusSucceed {
+	if m.historicalData[len(m.historicalData)-1].Succeeded == ExecutionSucceeded {
 		return StatusUp
 	}
 

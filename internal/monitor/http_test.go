@@ -32,7 +32,7 @@ func TestReturnsSuccessfulHttpResult(t *testing.T) {
 	result, err := httpProbe.Execute()
 
 	assert.Nil(t, err)
-	assert.Equal(t, result.Status, monitor.StatusSucceed)
+	assert.Equal(t, result.Succeeded, monitor.ExecutionSucceeded)
 }
 
 func TestReturnsFailureOnNonSuccessfulRequest(t *testing.T) {
@@ -46,5 +46,5 @@ func TestReturnsFailureOnNonSuccessfulRequest(t *testing.T) {
 	result, err := httpProbe.Execute()
 
 	assert.Nil(t, err)
-	assert.Equal(t, result.Status, monitor.StatusFailed)
+	assert.Equal(t, result.Succeeded, monitor.ExecutionFailed)
 }
