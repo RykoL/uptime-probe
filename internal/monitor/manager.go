@@ -34,10 +34,14 @@ func (m *Manager) ApplyConfig(cfg *config.Config) {
 func (m *Manager) Run() {
 	for {
 		for _, monitor := range m.monitors {
-			m.log.Info("Executing probe", "monitor_name", monitor.Name)
 
+			if !monitor.ShouldExecuteProbe() {
+				continue
+			}
+
+			m.log.Info("Executing probe", "monitor_name", monitor.Name)
 			if err := monitor.Probe(); err != nil {
-				m.log.Info("Failed executing probe", "monitor_name", monitor.Name)
+				m.log.Warn(err.Error(), "monitor_name", monitor.Name)
 			}
 		}
 	}

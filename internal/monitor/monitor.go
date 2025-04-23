@@ -77,6 +77,8 @@ func (m *Monitor) Probe() error {
 		return err
 	}
 
+	result.TimeStamp = time.Now()
+
 	m.previousProbes = append(m.previousProbes, result)
 
 	return nil

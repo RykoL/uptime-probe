@@ -84,3 +84,13 @@ func TestMonitor_Probe_StoresProbeResult(t *testing.T) {
 
 	assert.NotEmpty(t, m.GetPreviousProbes())
 }
+
+func TestMonitor_ShouldExecuteProbe_ReturnsFalseDirectlyAfterExecuting(t *testing.T) {
+	m := NewMonitor("", oneMinute, &NoOpProbe{})
+
+	assert.True(t, m.ShouldExecuteProbe())
+
+	m.Probe()
+
+	assert.False(t, m.ShouldExecuteProbe())
+}
