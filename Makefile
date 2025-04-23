@@ -7,9 +7,8 @@ generate:
 clean:
 	rm ./main
 
-run:
-	templ generate --watch --proxy="http://localhost:8080" --cmd="go run cmd/main.go" --open-browser=false
-	./main
+run-dev:
+	templ generate --watch --proxy="http://localhost:8080" --cmd="go run cmd/main.go config/testdata/example.yaml" --open-browser=false
 
 test: generate
 	go test ./...
