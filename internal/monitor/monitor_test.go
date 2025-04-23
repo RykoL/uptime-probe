@@ -22,7 +22,7 @@ func TestCreatesMonitorWithName(t *testing.T) {
 }
 
 func TestReturnsThatMonitorIsUpWhenLatestResultIsSuccessful(t *testing.T) {
-	monitor := Monitor{Name: "", previousProbes: []ProbeResult{
+	monitor := Monitor{Name: "", previousProbes: []*ProbeResult{
 		{Succeeded: ExecutionSucceeded},
 	}}
 
@@ -30,7 +30,7 @@ func TestReturnsThatMonitorIsUpWhenLatestResultIsSuccessful(t *testing.T) {
 }
 
 func TestReturnsDownWhenLastResultIsAFailure(t *testing.T) {
-	monitor := Monitor{Name: "", previousProbes: []ProbeResult{
+	monitor := Monitor{Name: "", previousProbes: []*ProbeResult{
 		{Succeeded: ExecutionFailed},
 	}}
 
@@ -54,7 +54,7 @@ func TestReturnsTrueIfLastExecutionLiesBehindInterval(t *testing.T) {
 	m := Monitor{
 		Name:     "asdasd",
 		Interval: oneSecond,
-		previousProbes: []ProbeResult{
+		previousProbes: []*ProbeResult{
 			{Succeeded: true, TimeStamp: lastExecution},
 		},
 	}
@@ -67,10 +67,20 @@ func TestReturnsFalseIfLastExecutionLiesAfterInterval(t *testing.T) {
 	m := Monitor{
 		Name:     "asdasd",
 		Interval: oneMinute,
-		previousProbes: []ProbeResult{
+		previousProbes: []*ProbeResult{
 			{Succeeded: true, TimeStamp: lastExecution},
 		},
 	}
 
 	assert.Equal(t, false, m.ShouldExecuteProbe())
+}
+
+func TestMonitor_Probe_StoresProbeResult(t *testing.T) {
+	m := NewMonitor("", oneMinute, &NoOpProbe{})
+
+	assert.Empty(t, m.GetPreviousProbes())
+
+	m.Probe()
+
+	assert.NotEmpty(t, m.GetPreviousProbes())
 }

@@ -15,7 +15,7 @@ type Monitor struct {
 	Name           string
 	Interval       time.Duration
 	probe          Probe
-	previousProbes []ProbeResult
+	previousProbes []*ProbeResult
 }
 
 func NewMonitor(name string, interval time.Duration, probe Probe) *Monitor {
@@ -23,7 +23,7 @@ func NewMonitor(name string, interval time.Duration, probe Probe) *Monitor {
 		Name:           name,
 		Interval:       interval,
 		probe:          probe,
-		previousProbes: make([]ProbeResult, 0),
+		previousProbes: make([]*ProbeResult, 0),
 	}
 }
 
@@ -70,5 +70,18 @@ func (m *Monitor) ShouldExecuteProbe() bool {
 }
 
 func (m *Monitor) Probe() error {
+
+	result, err := m.probe.Execute()
+
+	if err != nil {
+		return err
+	}
+
+	m.previousProbes = append(m.previousProbes, result)
+
 	return nil
+}
+
+func (m *Monitor) GetPreviousProbes() []*ProbeResult {
+	return m.previousProbes
 }
