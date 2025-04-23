@@ -13,9 +13,13 @@ import (
 )
 
 func main() {
-	cfg, err := config.LoadFromFile(os.Args[1])
-
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	if len(os.Args) < 2 {
+		logger.Error("Missing required parameter config")
+		os.Exit(1)
+	}
+	cfg, err := config.LoadFromFile(os.Args[1])
 
 	if err != nil {
 		log.Fatal("Failed to load config", err)
@@ -23,6 +27,7 @@ func main() {
 
 	manager := monitor.NewManager(logger)
 	manager.ApplyConfig(cfg)
+	manager.Run()
 
 	monitors := []model.Monitor{
 		{Name: "GCP", Status: "Up"},
