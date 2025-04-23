@@ -22,7 +22,7 @@ func TestCreatesMonitorWithName(t *testing.T) {
 }
 
 func TestReturnsThatMonitorIsUpWhenLatestResultIsSuccessful(t *testing.T) {
-	monitor := Monitor{Name: "", historicalData: []ProbeResult{
+	monitor := Monitor{Name: "", previousProbes: []ProbeResult{
 		{Succeeded: ExecutionSucceeded},
 	}}
 
@@ -30,7 +30,7 @@ func TestReturnsThatMonitorIsUpWhenLatestResultIsSuccessful(t *testing.T) {
 }
 
 func TestReturnsDownWhenLastResultIsAFailure(t *testing.T) {
-	monitor := Monitor{Name: "", historicalData: []ProbeResult{
+	monitor := Monitor{Name: "", previousProbes: []ProbeResult{
 		{Succeeded: ExecutionFailed},
 	}}
 
@@ -54,7 +54,7 @@ func TestReturnsTrueIfLastExecutionLiesBehindInterval(t *testing.T) {
 	m := Monitor{
 		Name:     "asdasd",
 		Interval: oneSecond,
-		historicalData: []ProbeResult{
+		previousProbes: []ProbeResult{
 			{Succeeded: true, TimeStamp: lastExecution},
 		},
 	}
@@ -67,7 +67,7 @@ func TestReturnsFalseIfLastExecutionLiesAfterInterval(t *testing.T) {
 	m := Monitor{
 		Name:     "asdasd",
 		Interval: oneMinute,
-		historicalData: []ProbeResult{
+		previousProbes: []ProbeResult{
 			{Succeeded: true, TimeStamp: lastExecution},
 		},
 	}
