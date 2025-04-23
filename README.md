@@ -36,21 +36,21 @@ This Go application provides a basic blackbox monitoring solution for HTTP servi
 2.  Define your target services in the `config.yaml` file using the following structure:
 
     ```yaml
-    targets:
+    monitors:
       - name: My Website
         url: https://www.example.com
-        interval: 60 # Interval in seconds
+        interval: 60s
       - name: My API
         url: https://api.example.com/health
-        interval: 30
+        interval: 30s
       - name: Another Service
         url: http://localhost:8080
-        interval: 120
+        interval: 2m
     ```
 
     * `name`: A descriptive name for the target.
     * `url`: The HTTP URL to probe.
-    * `interval`: The probing interval in seconds.
+    * `interval`: The probing interval.
 
 ### Running the Application
 
