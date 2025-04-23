@@ -1,10 +1,7 @@
 monitors:
-  - name: My Website
-    url: "https://www.example.com"
-    interval: 60s
   - name: My API
-    url: https://api.example.com/health
+    url: https://httpbin.org/get
     interval: 30s
-  - name: Another Service
-    url: http://localhost:8080
+  - name: Google
+    url: https://google.com
     interval: 120s

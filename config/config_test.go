@@ -10,5 +10,5 @@ func TestLoadsSimpleConfiguration(t *testing.T) {
 	cfg, err := config.LoadFromFile("testdata/example.yaml")
 
 	assert.NoError(t, err)
-	assert.Equal(t, 3, len(cfg.Monitors))
+	assert.Equal(t, 2, len(cfg.Monitors))
 }
