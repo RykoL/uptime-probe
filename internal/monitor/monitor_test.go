@@ -95,3 +95,19 @@ func TestMonitor_ShouldExecuteProbe_ReturnsFalseDirectlyAfterExecuting(t *testin
 
 	assert.False(t, m.ShouldExecuteProbe())
 }
+
+func TestNewMonitorFromRecord_CorrectlyMapsFields(t *testing.T) {
+	record := monitorRecord{
+		Id:         0,
+		Name:       "MyMonitor",
+		Interval:   oneMinute,
+		Definition: `{"url": "https: //google.com"}`,
+	}
+
+	m, err := NewMonitorFromRecord(record)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "MyMonitor", m.Name)
+	assert.Equal(t, oneMinute, m.Interval)
+	assert.NotNil(t, m.probe)
+}

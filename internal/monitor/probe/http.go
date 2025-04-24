@@ -2,19 +2,18 @@ package probe
 
 import (
 	"net/http"
-	"net/url"
 )
 
 type HttpProbe struct {
-	url *url.URL
+	Url string `json:"Url"`
 }
 
-func NewHttpProbe(url *url.URL) HttpProbe {
+func NewHttpProbe(url string) HttpProbe {
 	return HttpProbe{url}
 }
 
 func (p *HttpProbe) Execute() (*ProbeResult, error) {
-	resp, err := http.Get(p.url.String())
+	resp, err := http.Get(p.Url)
 
 	if err != nil {
 		return nil, err

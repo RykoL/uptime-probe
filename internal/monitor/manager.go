@@ -4,7 +4,6 @@ import (
 	"github.com/RykoL/uptime-probe/config"
 	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"log/slog"
-	"net/url"
 	"time"
 )
 
@@ -19,11 +18,7 @@ func NewManager(logger *slog.Logger) Manager {
 
 func (m *Manager) ApplyConfig(cfg *config.Config) {
 	for _, monitorConfig := range cfg.Monitors {
-		target, err := url.Parse(monitorConfig.Url)
-
-		if err != nil {
-			m.log.Warn("Failed to create monitor %s: %v", monitorConfig.Name, err)
-		}
+		target := monitorConfig.Url
 
 		newProbe := probe.NewHttpProbe(target)
 		// TODO: Load interval from configuration

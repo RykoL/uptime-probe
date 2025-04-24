@@ -5,7 +5,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 )
 
@@ -24,10 +23,10 @@ func server() *httptest.Server {
 func TestReturnsSuccessfulHttpResult(t *testing.T) {
 
 	server := server()
-	targetUrl, _ := url.Parse(server.URL)
+	targetUrl := server.URL + "/success"
 	defer server.Close()
 
-	httpProbe := probe.NewHttpProbe(targetUrl.JoinPath("/success"))
+	httpProbe := probe.NewHttpProbe(targetUrl)
 
 	result, err := httpProbe.Execute()
 
@@ -38,10 +37,10 @@ func TestReturnsSuccessfulHttpResult(t *testing.T) {
 func TestReturnsFailureOnNonSuccessfulRequest(t *testing.T) {
 
 	server := server()
-	targetUrl, _ := url.Parse(server.URL)
+	targetUrl := server.URL + "/failure"
 	defer server.Close()
 
-	httpProbe := probe.NewHttpProbe(targetUrl.JoinPath("/failure"))
+	httpProbe := probe.NewHttpProbe(targetUrl)
 
 	result, err := httpProbe.Execute()
 

@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"encoding/json"
 	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"time"
 )
@@ -28,6 +29,23 @@ func NewMonitor(name string, interval time.Duration, p probe.Probe) *Monitor {
 		probe:          p,
 		previousProbes: make([]*probe.ProbeResult, 0),
 	}
+}
+
+func NewMonitorFromRecord(record monitorRecord) (*Monitor, error) {
+
+	httpProbe := probe.HttpProbe{}
+
+	err := json.Unmarshal([]byte(record.Definition), &httpProbe)
+
+	if err != nil {
+		return nil, err
+	}
+
+	m := &Monitor{}
+	m.Name = record.Name
+	m.Interval = record.Interval
+	m.probe = &httpProbe
+	return m, nil
 }
 
 func (m *Monitor) Status() Status {

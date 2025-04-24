@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/RykoL/uptime-probe/config"
+	"github.com/RykoL/uptime-probe/internal/db"
 	"github.com/RykoL/uptime-probe/internal/monitor"
 	"github.com/RykoL/uptime-probe/web/model"
 	"github.com/RykoL/uptime-probe/web/static"
@@ -24,6 +25,13 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to load config", err)
 	}
+	dbpool, err := db.CreateDBPool(os.Getenv("DATABASE_URL"))
+
+	if err != nil {
+		log.Fatal("Failed to connect to the database", err)
+	}
+
+	defer dbpool.Close()
 
 	manager := monitor.NewManager(logger)
 	manager.ApplyConfig(cfg)
