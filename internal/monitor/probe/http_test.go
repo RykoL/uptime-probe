@@ -1,7 +1,7 @@
-package monitor_test
+package probe_test
 
 import (
-	"github.com/RykoL/uptime-probe/internal/monitor"
+	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -27,12 +27,12 @@ func TestReturnsSuccessfulHttpResult(t *testing.T) {
 	targetUrl, _ := url.Parse(server.URL)
 	defer server.Close()
 
-	httpProbe := monitor.NewHttpProbe(targetUrl.JoinPath("/success"))
+	httpProbe := probe.NewHttpProbe(targetUrl.JoinPath("/success"))
 
 	result, err := httpProbe.Execute()
 
 	assert.Nil(t, err)
-	assert.Equal(t, result.Succeeded, monitor.ExecutionSucceeded)
+	assert.Equal(t, result.Succeeded, probe.ExecutionSucceeded)
 }
 
 func TestReturnsFailureOnNonSuccessfulRequest(t *testing.T) {
@@ -41,10 +41,10 @@ func TestReturnsFailureOnNonSuccessfulRequest(t *testing.T) {
 	targetUrl, _ := url.Parse(server.URL)
 	defer server.Close()
 
-	httpProbe := monitor.NewHttpProbe(targetUrl.JoinPath("/failure"))
+	httpProbe := probe.NewHttpProbe(targetUrl.JoinPath("/failure"))
 
 	result, err := httpProbe.Execute()
 
 	assert.Nil(t, err)
-	assert.Equal(t, result.Succeeded, monitor.ExecutionFailed)
+	assert.Equal(t, result.Succeeded, probe.ExecutionFailed)
 }

@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"github.com/RykoL/uptime-probe/config"
+	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"log/slog"
 	"net/url"
 	"time"
@@ -24,10 +25,10 @@ func (m *Manager) ApplyConfig(cfg *config.Config) {
 			m.log.Warn("Failed to create monitor %s: %v", monitorConfig.Name, err)
 		}
 
-		probe := NewHttpProbe(target)
+		newProbe := probe.NewHttpProbe(target)
 		// TODO: Load interval from configuration
 		interval, _ := time.ParseDuration("1m")
-		m.monitors = append(m.monitors, NewMonitor(monitorConfig.Name, interval, &probe))
+		m.monitors = append(m.monitors, NewMonitor(monitorConfig.Name, interval, &newProbe))
 	}
 }
 

@@ -1,4 +1,4 @@
-package monitor
+package probe
 
 import "time"
 

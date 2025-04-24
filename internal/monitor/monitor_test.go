@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -12,8 +13,8 @@ type NoOpProbe struct {
 var oneSecond, _ = time.ParseDuration("1s")
 var oneMinute, _ = time.ParseDuration("1m")
 
-func (p *NoOpProbe) Execute() (*ProbeResult, error) {
-	return &ProbeResult{Succeeded: true}, nil
+func (p *NoOpProbe) Execute() (*probe.ProbeResult, error) {
+	return &probe.ProbeResult{Succeeded: true}, nil
 }
 
 func TestCreatesMonitorWithName(t *testing.T) {
@@ -22,16 +23,16 @@ func TestCreatesMonitorWithName(t *testing.T) {
 }
 
 func TestReturnsThatMonitorIsUpWhenLatestResultIsSuccessful(t *testing.T) {
-	monitor := Monitor{Name: "", previousProbes: []*ProbeResult{
-		{Succeeded: ExecutionSucceeded},
+	monitor := Monitor{Name: "", previousProbes: []*probe.ProbeResult{
+		{Succeeded: probe.ExecutionSucceeded},
 	}}
 
 	assert.Equal(t, Status(StatusUp), monitor.Status())
 }
 
 func TestReturnsDownWhenLastResultIsAFailure(t *testing.T) {
-	monitor := Monitor{Name: "", previousProbes: []*ProbeResult{
-		{Succeeded: ExecutionFailed},
+	monitor := Monitor{Name: "", previousProbes: []*probe.ProbeResult{
+		{Succeeded: probe.ExecutionFailed},
 	}}
 
 	assert.Equal(t, Status(StatusDown), monitor.Status())
@@ -54,7 +55,7 @@ func TestReturnsTrueIfLastExecutionLiesBehindInterval(t *testing.T) {
 	m := Monitor{
 		Name:     "asdasd",
 		Interval: oneSecond,
-		previousProbes: []*ProbeResult{
+		previousProbes: []*probe.ProbeResult{
 			{Succeeded: true, TimeStamp: lastExecution},
 		},
 	}
@@ -67,7 +68,7 @@ func TestReturnsFalseIfLastExecutionLiesAfterInterval(t *testing.T) {
 	m := Monitor{
 		Name:     "asdasd",
 		Interval: oneMinute,
-		previousProbes: []*ProbeResult{
+		previousProbes: []*probe.ProbeResult{
 			{Succeeded: true, TimeStamp: lastExecution},
 		},
 	}
