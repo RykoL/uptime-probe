@@ -49,5 +49,9 @@ func (r *Repository) GetMonitors(ctx context.Context) ([]monitorRecord, error) {
 		results = append(results, res)
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return results, nil
 }
