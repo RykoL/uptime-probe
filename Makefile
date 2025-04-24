@@ -1,6 +1,7 @@
 CONTAINER_NAME=timescaledb
 IMAGE=timescale/timescaledb-ha:pg17
 PG_PASSWORD=password
+DATABASE_URL="postgresql://postgres:$(PG_PASSWORD)@localhost:5432/postgres"
 
 SOURCES=$(shell find . -name "*.go")
 MOD_FILES=go.mod go.sum
@@ -17,7 +18,7 @@ build: generate $(BIN)
 generate: $(TEMPL_TARGETS)
 
 test: generate
-	go test ./...
+	go test ./... -v
 
 clean: $(BIN)
 	@rm $(BIN)
@@ -40,7 +41,7 @@ run-db:
     fi
 
 run-dev: run-db
-	templ generate --watch --proxy="http://localhost:8080" --cmd="go run cmd/main.go config/testdata/example.yaml" --open-browser=false
+	@DATABASE_URL=$(DATABASE_URL) templ generate --watch --proxy="http://localhost:8080" --cmd="go run cmd/main.go config/testdata/example.yaml" --open-browser=false
 
 
 .PHONY: build generate run-db run-dev test clean
