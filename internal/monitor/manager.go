@@ -4,7 +4,6 @@ import (
 	"github.com/RykoL/uptime-probe/config"
 	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"log/slog"
-	"time"
 )
 
 type Manager struct {
@@ -21,9 +20,7 @@ func (m *Manager) ApplyConfig(cfg *config.Config) {
 		target := monitorConfig.Url
 
 		newProbe := probe.NewHttpProbe(target)
-		// TODO: Load interval from configuration
-		interval, _ := time.ParseDuration("1m")
-		m.monitors = append(m.monitors, NewMonitor(monitorConfig.Name, interval, &newProbe))
+		m.monitors = append(m.monitors, NewMonitor(monitorConfig.Name, monitorConfig.Interval, &newProbe))
 	}
 }
 

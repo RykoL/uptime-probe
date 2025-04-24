@@ -13,7 +13,7 @@ type Config struct {
 type MonitorConfig struct {
 	Name     string        `yaml:"name"`
 	Url      string        `yaml:"url"`
-	interval time.Duration `yaml:"interval"`
+	Interval time.Duration `yaml:"interval"`
 }
 
 func LoadFromFile(fileName string) (*Config, error) {
@@ -23,8 +23,12 @@ func LoadFromFile(fileName string) (*Config, error) {
 		return nil, err
 	}
 
+	return LoadConfig(content)
+}
+
+func LoadConfig(rawConfig []byte) (*Config, error) {
 	cfg := &Config{}
-	err = yaml.Unmarshal([]byte(content), cfg)
+	err := yaml.Unmarshal(rawConfig, cfg)
 
 	if err != nil {
 		return nil, err

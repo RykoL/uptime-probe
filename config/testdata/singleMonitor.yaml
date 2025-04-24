@@ -1,0 +1,4 @@
+monitors:
+  - name: MyMonitor
+    url: https://google.com
+    interval: 30s
