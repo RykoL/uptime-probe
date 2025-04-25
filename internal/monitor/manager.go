@@ -1,20 +1,24 @@
 package monitor
 
 import (
-	"context"
+	"fmt"
 	"github.com/RykoL/uptime-probe/config"
 	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"log/slog"
 )
 
 type Manager struct {
-	monitors   []*Monitor
-	log        *slog.Logger
-	repository *Repository
+	monitors    []*Monitor
+	log         *slog.Logger
+	repository  *Repository
+	initialized bool
 }
 
 func NewManager(logger *slog.Logger, repository *Repository) Manager {
 	return Manager{log: logger, repository: repository}
+}
+
+func (m *Manager) Init() {
 }
 
 func (m *Manager) ApplyConfig(cfg *config.Config) {
@@ -26,11 +30,16 @@ func (m *Manager) ApplyConfig(cfg *config.Config) {
 	}
 }
 
-func (m *Manager) reconcile(ctx context.Context) {
-	//existingMonitors, err := m.repository.GetMonitors(ctx)
-}
+/*func (m *Manager) reconcile(ctx context.Context) {
+	existingMonitors, err := m.repository.GetMonitors(ctx)
+}*/
 
-func (m *Manager) Run() {
+func (m *Manager) Run() error {
+
+	if !m.initialized {
+		return fmt.Errorf("manager is not initialized yet. Call Init() before running")
+	}
+
 	for {
 		for _, monitor := range m.monitors {
 
