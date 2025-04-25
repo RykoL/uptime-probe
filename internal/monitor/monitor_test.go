@@ -116,14 +116,14 @@ func TestNewMonitorFromRecord_CorrectlyMapsFields(t *testing.T) {
 	assert.NotNil(t, m.probe)
 }
 
-func TestIsSameAs_ReturnsTrueWhenBothMonitorsShareSameAttributes(t *testing.T) {
+func TestMonitor_IsSameAs_ReturnsTrueWhenBothMonitorsShareSameAttributes(t *testing.T) {
 	m1 := NewMonitor("FirstMonitor", oneMinute, probe.NewHttpProbe("https://api.mytest.foo"))
 	m2 := NewMonitor("FirstMonitor", oneMinute, probe.NewHttpProbe("https://api.mytest.foo"))
 
 	assert.True(t, m1.IsSameAs(m2))
 }
 
-func TestIsSameAs_ReturnsFalseWhenBothMonitorsHaveDifferentAttributes(t *testing.T) {
+func TestMonitor_IsSameAs_ReturnsFalseWhenBothMonitorsHaveDifferentAttributes(t *testing.T) {
 	m1 := NewMonitor("FirstMonitor", oneMinute, probe.NewHttpProbe("https://api.mytest.foo"))
 	m2 := NewMonitor("SecondMonitor", oneMinute, probe.NewHttpProbe("https://api.mytest.foo"))
 
