@@ -33,7 +33,7 @@ func main() {
 
 	defer dbpool.Close()
 
-	manager := monitor.NewManager(logger)
+	manager := monitor.NewManager(logger, nil)
 	manager.ApplyConfig(cfg)
 	manager.Run()
 

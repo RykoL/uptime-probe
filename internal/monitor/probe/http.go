@@ -8,8 +8,12 @@ type HttpProbe struct {
 	Url string `json:"Url"`
 }
 
-func NewHttpProbe(url string) HttpProbe {
-	return HttpProbe{url}
+func NewHttpProbe(url string) *HttpProbe {
+	return &HttpProbe{url}
+}
+
+func (p *HttpProbe) Target() string {
+	return p.Url
 }
 
 func (p *HttpProbe) Execute() (*ProbeResult, error) {

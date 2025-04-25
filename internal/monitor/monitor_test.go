@@ -13,6 +13,10 @@ type NoOpProbe struct {
 var oneSecond, _ = time.ParseDuration("1s")
 var oneMinute, _ = time.ParseDuration("1m")
 
+func (p *NoOpProbe) Target() string {
+	return ""
+}
+
 func (p *NoOpProbe) Execute() (*probe.ProbeResult, error) {
 	return &probe.ProbeResult{Succeeded: true}, nil
 }
@@ -110,4 +114,18 @@ func TestNewMonitorFromRecord_CorrectlyMapsFields(t *testing.T) {
 	assert.Equal(t, "MyMonitor", m.Name)
 	assert.Equal(t, oneMinute, m.Interval)
 	assert.NotNil(t, m.probe)
+}
+
+func TestIsSameAs_ReturnsTrueWhenBothMonitorsShareSameAttributes(t *testing.T) {
+	m1 := NewMonitor("FirstMonitor", oneMinute, probe.NewHttpProbe("https://api.mytest.foo"))
+	m2 := NewMonitor("FirstMonitor", oneMinute, probe.NewHttpProbe("https://api.mytest.foo"))
+
+	assert.True(t, m1.IsSameAs(m2))
+}
+
+func TestIsSameAs_ReturnsFalseWhenBothMonitorsHaveDifferentAttributes(t *testing.T) {
+	m1 := NewMonitor("FirstMonitor", oneMinute, probe.NewHttpProbe("https://api.mytest.foo"))
+	m2 := NewMonitor("SecondMonitor", oneMinute, probe.NewHttpProbe("https://api.mytest.foo"))
+
+	assert.False(t, m1.IsSameAs(m2))
 }

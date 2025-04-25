@@ -23,7 +23,7 @@ type monitorRecord struct {
 	Definition string
 }
 
-func (r *Repository) GetMonitors(ctx context.Context) ([]monitorRecord, error) {
+func (r *Repository) GetMonitors(ctx context.Context) ([]*Monitor, error) {
 	rows, err := r.conn.Query(ctx, `
 		SELECT 
 			monitor.id, name, interval, definition
@@ -37,7 +37,7 @@ func (r *Repository) GetMonitors(ctx context.Context) ([]monitorRecord, error) {
 
 	defer rows.Close()
 
-	var results []monitorRecord
+	var results []*Monitor
 	for rows.Next() {
 		var res monitorRecord
 		err = rows.Scan(&res.Id, &res.Name, &res.Interval, &res.Definition)
@@ -46,7 +46,13 @@ func (r *Repository) GetMonitors(ctx context.Context) ([]monitorRecord, error) {
 			r.log.Error("Failed to scan row")
 		}
 
-		results = append(results, res)
+		m, err := NewMonitorFromRecord(res)
+
+		if err != nil {
+			r.log.Error("Failed to map into a monitor")
+		}
+
+		results = append(results, m)
 	}
 
 	if err := rows.Err(); err != nil {

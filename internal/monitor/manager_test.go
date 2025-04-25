@@ -11,7 +11,7 @@ func TestCreatesMonitorForEveryEntryInConfiguration(t *testing.T) {
 		{Name: "TestMonitor", Url: "http://localhost:8080"},
 	}}
 
-	m := NewManager(nil)
+	m := NewManager(nil, nil)
 	m.ApplyConfig(&cfg)
 
 	assert.Equal(t, 1, len(m.monitors))
