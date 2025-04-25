@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"context"
 	"fmt"
 	"github.com/RykoL/uptime-probe/config"
 	"github.com/RykoL/uptime-probe/internal/monitor/probe"
@@ -10,15 +11,25 @@ import (
 type Manager struct {
 	monitors    []*Monitor
 	log         *slog.Logger
-	repository  *Repository
+	repository  Repository
 	initialized bool
 }
 
-func NewManager(logger *slog.Logger, repository *Repository) Manager {
+func NewManager(logger *slog.Logger, repository Repository) Manager {
 	return Manager{log: logger, repository: repository}
 }
 
-func (m *Manager) Init() {
+func (m *Manager) Init(ctx context.Context) error {
+	monitors, err := m.repository.GetMonitors(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	m.monitors = monitors
+	m.log.Info("Monitors loaded", slog.Int("count", len(monitors)))
+	m.initialized = true
+	return nil
 }
 
 func (m *Manager) ApplyConfig(cfg *config.Config) {

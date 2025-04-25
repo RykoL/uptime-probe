@@ -1,11 +1,25 @@
 package monitor
 
 import (
+	"context"
 	"fmt"
 	"github.com/RykoL/uptime-probe/config"
 	"github.com/stretchr/testify/assert"
+	"log/slog"
+	"os"
 	"testing"
 )
+
+type RepositorySpy struct {
+	shouldReturnError bool
+}
+
+func (r *RepositorySpy) GetMonitors(ctx context.Context) ([]*Monitor, error) {
+	if r.shouldReturnError {
+		return nil, fmt.Errorf("")
+	}
+	return make([]*Monitor, 0), nil
+}
 
 func TestCreatesMonitorForEveryEntryInConfiguration(t *testing.T) {
 	cfg := config.Config{Monitors: []*config.MonitorConfig{
@@ -24,4 +38,23 @@ func TestManager_Run_ReturnsErrorIfManagerIsNotInitialized(t *testing.T) {
 	err := m.Run()
 
 	assert.Error(t, err, fmt.Errorf("manager is not initialized yet. Call Init() before running"))
+}
+
+func TestManager_Init_SetsManagerToInitializedWhenSuccessful(t *testing.T) {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	m := NewManager(logger, &RepositorySpy{})
+
+	m.Init(context.Background())
+
+	assert.True(t, m.initialized)
+}
+
+func TestManager_Init_DoesNotSetManagerToInitializedWhenFailing(t *testing.T) {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	m := NewManager(logger, &RepositorySpy{shouldReturnError: true})
+
+	err := m.Init(context.Background())
+
+	assert.Error(t, err)
+	assert.False(t, m.initialized)
 }

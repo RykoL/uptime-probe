@@ -7,13 +7,17 @@ import (
 	"time"
 )
 
-type Repository struct {
+type Repository interface {
+	GetMonitors(ctx context.Context) ([]*Monitor, error)
+}
+
+type PostgresRepository struct {
 	conn *pgxpool.Pool
 	log  *slog.Logger
 }
 
-func NewRepository(conn *pgxpool.Pool, logger *slog.Logger) Repository {
-	return Repository{conn, logger}
+func NewRepository(conn *pgxpool.Pool, logger *slog.Logger) PostgresRepository {
+	return PostgresRepository{conn, logger}
 }
 
 type monitorRecord struct {
@@ -23,7 +27,7 @@ type monitorRecord struct {
 	Definition string
 }
 
-func (r *Repository) GetMonitors(ctx context.Context) ([]*Monitor, error) {
+func (r *PostgresRepository) GetMonitors(ctx context.Context) ([]*Monitor, error) {
 	rows, err := r.conn.Query(ctx, `
 		SELECT 
 			monitor.id, name, interval, definition
