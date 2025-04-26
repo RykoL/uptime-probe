@@ -19,7 +19,7 @@ func NewManager(logger *slog.Logger, repository Repository) Manager {
 	return Manager{log: logger, repository: repository}
 }
 
-func (m *Manager) Init(ctx context.Context) error {
+func (m *Manager) Initialize(ctx context.Context) error {
 	monitors, err := m.repository.GetMonitors(ctx)
 
 	if err != nil {
@@ -48,7 +48,7 @@ func (m *Manager) ApplyConfig(cfg *config.Config) {
 func (m *Manager) Run() error {
 
 	if !m.initialized {
-		return fmt.Errorf("manager is not initialized yet. Call Init() before running")
+		return fmt.Errorf("manager is not initialized yet. Call Initialize() before running")
 	}
 
 	for {

@@ -37,14 +37,14 @@ func TestManager_Run_ReturnsErrorIfManagerIsNotInitialized(t *testing.T) {
 
 	err := m.Run()
 
-	assert.Error(t, err, fmt.Errorf("manager is not initialized yet. Call Init() before running"))
+	assert.Error(t, err, fmt.Errorf("manager is not initialized yet. Call Initialize() before running"))
 }
 
 func TestManager_Init_SetsManagerToInitializedWhenSuccessful(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	m := NewManager(logger, &RepositorySpy{})
 
-	m.Init(context.Background())
+	m.Initialize(context.Background())
 
 	assert.True(t, m.initialized)
 }
@@ -53,7 +53,7 @@ func TestManager_Init_DoesNotSetManagerToInitializedWhenFailing(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	m := NewManager(logger, &RepositorySpy{shouldReturnError: true})
 
-	err := m.Init(context.Background())
+	err := m.Initialize(context.Background())
 
 	assert.Error(t, err)
 	assert.False(t, m.initialized)
