@@ -34,16 +34,24 @@ func (m *Manager) Initialize(ctx context.Context) error {
 
 func (m *Manager) ApplyConfig(cfg *config.Config) {
 	for _, monitorConfig := range cfg.Monitors {
-		target := monitorConfig.Url
-
-		newProbe := probe.NewHttpProbe(target)
-		m.monitors = append(m.monitors, NewMonitor(monitorConfig.Name, monitorConfig.Interval, newProbe))
+		newMonitor := NewMonitor(monitorConfig.Name, monitorConfig.Interval, probe.NewHttpProbe(monitorConfig.Url))
+		if !m.monitorExists(newMonitor) {
+			m.log.Info("Found new monitor from config", "name", newMonitor.Name)
+			m.monitors = append(m.monitors, newMonitor)
+		}
 	}
+
 }
 
-/*func (m *Manager) reconcile(ctx context.Context) {
-	existingMonitors, err := m.repository.GetMonitors(ctx)
-}*/
+func (m *Manager) monitorExists(monitor *Monitor) bool {
+	for _, existingMonitor := range m.monitors {
+		if existingMonitor.Equals(monitor) {
+			return true
+		}
+	}
+
+	return false
+}
 
 func (m *Manager) Run() error {
 

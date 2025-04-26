@@ -120,12 +120,12 @@ func TestMonitor_IsSameAs_ReturnsTrueWhenBothMonitorsShareSameAttributes(t *test
 	m1 := NewMonitor("FirstMonitor", oneMinute, probe.NewHttpProbe("https://api.mytest.foo"))
 	m2 := NewMonitor("FirstMonitor", oneMinute, probe.NewHttpProbe("https://api.mytest.foo"))
 
-	assert.True(t, m1.IsSameAs(m2))
+	assert.True(t, m1.Equals(m2))
 }
 
 func TestMonitor_IsSameAs_ReturnsFalseWhenBothMonitorsHaveDifferentAttributes(t *testing.T) {
 	m1 := NewMonitor("FirstMonitor", oneMinute, probe.NewHttpProbe("https://api.mytest.foo"))
 	m2 := NewMonitor("SecondMonitor", oneMinute, probe.NewHttpProbe("https://api.mytest.foo"))
 
-	assert.False(t, m1.IsSameAs(m2))
+	assert.False(t, m1.Equals(m2))
 }

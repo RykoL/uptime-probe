@@ -109,6 +109,6 @@ func (m *Monitor) GetPreviousProbes() []*probe.ProbeResult {
 	return m.previousProbes
 }
 
-func (m *Monitor) IsSameAs(other *Monitor) bool {
+func (m *Monitor) Equals(other *Monitor) bool {
 	return m.Name == other.Name && m.Interval == other.Interval && m.probe.Target() == other.probe.Target()
 }

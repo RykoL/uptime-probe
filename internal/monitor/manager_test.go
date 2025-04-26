@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/RykoL/uptime-probe/config"
+	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"github.com/stretchr/testify/assert"
 	"log/slog"
 	"os"
@@ -11,14 +12,17 @@ import (
 )
 
 type RepositorySpy struct {
+	monitors          []*Monitor
 	shouldReturnError bool
 }
+
+var logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 func (r *RepositorySpy) GetMonitors(ctx context.Context) ([]*Monitor, error) {
 	if r.shouldReturnError {
 		return nil, fmt.Errorf("")
 	}
-	return make([]*Monitor, 0), nil
+	return r.monitors, nil
 }
 
 func TestCreatesMonitorForEveryEntryInConfiguration(t *testing.T) {
@@ -26,7 +30,7 @@ func TestCreatesMonitorForEveryEntryInConfiguration(t *testing.T) {
 		{Name: "TestMonitor", Url: "http://localhost:8080"},
 	}}
 
-	m := NewManager(nil, nil)
+	m := NewManager(logger, nil)
 	m.ApplyConfig(&cfg)
 
 	assert.Equal(t, 1, len(m.monitors))
@@ -50,11 +54,56 @@ func TestManager_Init_SetsManagerToInitializedWhenSuccessful(t *testing.T) {
 }
 
 func TestManager_Init_DoesNotSetManagerToInitializedWhenFailing(t *testing.T) {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	m := NewManager(logger, &RepositorySpy{shouldReturnError: true})
 
 	err := m.Initialize(context.Background())
 
 	assert.Error(t, err)
 	assert.False(t, m.initialized)
+}
+
+func TestManager_ApplyConfig_DoesNotAddMonitorFromConfigIfItAlreadyExistsInTheManager(t *testing.T) {
+	cfg := config.Config{Monitors: []*config.MonitorConfig{
+		{Name: "TestMonitor", Url: "http://localhost:8080", Interval: oneSecond},
+	}}
+
+	httpProbe := probe.NewHttpProbe("http://localhost:8080")
+
+	m := NewManager(logger, &RepositorySpy{
+		shouldReturnError: false,
+		monitors: []*Monitor{
+			NewMonitor("TestMonitor", oneSecond, httpProbe),
+		},
+	})
+
+	m.Initialize(context.Background())
+
+	assert.Len(t, m.monitors, 1)
+
+	m.ApplyConfig(&cfg)
+
+	assert.Len(t, m.monitors, 1)
+}
+
+func TestManager_ApplyConfig_DoesAddMonitorFromConfigIfMonitorDoesntExistYet(t *testing.T) {
+	cfg := config.Config{Monitors: []*config.MonitorConfig{
+		{Name: "TestMonitor", Url: "http://localhost:8080", Interval: oneSecond},
+	}}
+
+	httpProbe := probe.NewHttpProbe("http://localhost:3000")
+
+	m := NewManager(logger, &RepositorySpy{
+		shouldReturnError: false,
+		monitors: []*Monitor{
+			NewMonitor("MyNewAndDifferentMonitor", oneSecond, httpProbe),
+		},
+	})
+
+	m.Initialize(context.Background())
+
+	assert.Len(t, m.monitors, 1)
+
+	m.ApplyConfig(&cfg)
+
+	assert.Len(t, m.monitors, 2)
 }
