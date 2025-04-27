@@ -33,7 +33,9 @@ func main() {
 
 	defer dbpool.Close()
 
-	manager := monitor.NewManager(logger, nil)
+	repository := monitor.NewRepository(dbpool, logger)
+
+	manager := monitor.NewManager(logger, &repository)
 	manager.ApplyConfig(cfg)
 	manager.Run()
 
