@@ -9,6 +9,7 @@ import (
 
 type Repository interface {
 	GetMonitors(ctx context.Context) ([]*Monitor, error)
+	SaveMonitor(ctx context.Context, monitor *Monitor) error
 }
 
 type PostgresRepository struct {

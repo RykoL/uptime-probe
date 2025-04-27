@@ -23,6 +23,9 @@ test: generate
 clean: $(BIN)
 	@rm $(BIN)
 
+pre-commit: clean build test
+
+
 $(BIN): $(SOURCES) $(MOD_FILES) $(TEMPL_TARGETS)
 	@echo "Building main binary"
 	@go build -o $(BIN) ./cmd/main.go

@@ -14,6 +14,7 @@ import (
 type RepositorySpy struct {
 	monitors          []*Monitor
 	shouldReturnError bool
+	CalledSave        bool
 }
 
 var logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -25,12 +26,17 @@ func (r *RepositorySpy) GetMonitors(ctx context.Context) ([]*Monitor, error) {
 	return r.monitors, nil
 }
 
+func (r *RepositorySpy) SaveMonitor(ctx context.Context, monitor *Monitor) error {
+	r.CalledSave = true
+	return nil
+}
+
 func TestCreatesMonitorForEveryEntryInConfiguration(t *testing.T) {
 	cfg := config.Config{Monitors: []*config.MonitorConfig{
 		{Name: "TestMonitor", Url: "http://localhost:8080"},
 	}}
 
-	m := NewManager(logger, nil)
+	m := NewManager(logger, &RepositorySpy{})
 	m.ApplyConfig(&cfg)
 
 	assert.Equal(t, 1, len(m.monitors))
@@ -106,4 +112,19 @@ func TestManager_ApplyConfig_DoesAddMonitorFromConfigIfMonitorDoesntExistYet(t *
 	m.ApplyConfig(&cfg)
 
 	assert.Len(t, m.monitors, 2)
+}
+
+func TestManager_ApplyConfig_PersistsNewMonitors(t *testing.T) {
+	cfg := config.Config{Monitors: []*config.MonitorConfig{
+		{Name: "TestMonitor", Url: "http://localhost:8080", Interval: oneSecond},
+	}}
+	repo := &RepositorySpy{
+		shouldReturnError: false,
+		monitors:          make([]*Monitor, 0),
+	}
+	m := NewManager(logger, repo)
+
+	m.ApplyConfig(&cfg)
+
+	assert.True(t, repo.CalledSave)
 }
