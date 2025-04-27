@@ -1,4 +1,7 @@
-# Simple HTTP Uptime Monitor
+# HTTP Uptime Monitor
+[![CI](https://github.com/RykoL/uptime-probe/actions/workflows/go.yml/badge.svg)](https://github.com/RykoL/uptime-probe/actions/workflows/go.yml)
+![GitHub last commit](https://img.shields.io/github/last-commit/rykol/uptime-probe)
+
 
 This Go application provides a basic blackbox monitoring solution for HTTP services. It periodically probes defined targets and presents their uptime history through a simple web UI.
 
