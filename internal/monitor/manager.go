@@ -19,7 +19,7 @@ func NewManager(logger *slog.Logger, repository Repository) Manager {
 	return Manager{log: logger, repository: repository}
 }
 
-func (m *Manager) Initialize(ctx context.Context) error {
+func (m *Manager) Initialize(ctx context.Context, cfg *config.Config) error {
 	monitors, err := m.repository.GetMonitors(ctx)
 
 	if err != nil {
@@ -27,12 +27,13 @@ func (m *Manager) Initialize(ctx context.Context) error {
 	}
 
 	m.monitors = monitors
-	m.log.Info("Monitors loaded", slog.Int("count", len(monitors)))
+	m.applyConfig(cfg)
+	m.log.Info("Monitors loaded", slog.Int("count", len(m.monitors)))
 	m.initialized = true
 	return nil
 }
 
-func (m *Manager) ApplyConfig(cfg *config.Config) {
+func (m *Manager) applyConfig(cfg *config.Config) {
 	for _, monitorConfig := range cfg.Monitors {
 		newMonitor := NewMonitor(monitorConfig.Name, monitorConfig.Interval, probe.NewHttpProbe(monitorConfig.Url))
 		if !m.monitorExists(newMonitor) {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/RykoL/uptime-probe/config"
 	"github.com/RykoL/uptime-probe/internal/db"
 	"github.com/RykoL/uptime-probe/internal/monitor"
@@ -36,7 +37,10 @@ func main() {
 	repository := monitor.NewRepository(dbpool, logger)
 
 	manager := monitor.NewManager(logger, &repository)
-	manager.ApplyConfig(cfg)
+	err = manager.Initialize(context.Background(), cfg)
+	if err != nil {
+		log.Fatal("Failed to initialize MonitorManager", err)
+	}
 	manager.Run()
 
 	monitors := []model.Monitor{

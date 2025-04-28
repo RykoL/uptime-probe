@@ -37,7 +37,7 @@ func TestCreatesMonitorForEveryEntryInConfiguration(t *testing.T) {
 	}}
 
 	m := NewManager(logger, &RepositorySpy{})
-	m.ApplyConfig(&cfg)
+	m.applyConfig(&cfg)
 
 	assert.Equal(t, 1, len(m.monitors))
 }
@@ -86,7 +86,7 @@ func TestManager_ApplyConfig_DoesNotAddMonitorFromConfigIfItAlreadyExistsInTheMa
 
 	assert.Len(t, m.monitors, 1)
 
-	m.ApplyConfig(&cfg)
+	m.applyConfig(&cfg)
 
 	assert.Len(t, m.monitors, 1)
 }
@@ -109,7 +109,7 @@ func TestManager_ApplyConfig_DoesAddMonitorFromConfigIfMonitorDoesntExistYet(t *
 
 	assert.Len(t, m.monitors, 1)
 
-	m.ApplyConfig(&cfg)
+	m.applyConfig(&cfg)
 
 	assert.Len(t, m.monitors, 2)
 }
@@ -124,7 +124,7 @@ func TestManager_ApplyConfig_PersistsNewMonitors(t *testing.T) {
 	}
 	m := NewManager(logger, repo)
 
-	m.ApplyConfig(&cfg)
+	m.applyConfig(&cfg)
 
 	assert.True(t, repo.CalledSave)
 }

@@ -53,10 +53,11 @@ func (r *PostgresRepository) SaveMonitor(ctx context.Context, monitor *Monitor) 
 		return fmt.Errorf("failed to insert monitor: %w", err)
 	}
 
+	json, _ := monitor.probe.AsJSON()
 	probeQuery := `
 		INSERT INTO uptime.probe(definition, monitor_id) VALUES ($1, $2);
 	`
-	_, err = tx.Exec(ctx, probeQuery, "{}", monitorId)
+	_, err = tx.Exec(ctx, probeQuery, json, monitorId)
 	if err != nil {
 		return fmt.Errorf("failed to insert probe: %w", err)
 	}

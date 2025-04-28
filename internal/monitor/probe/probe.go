@@ -17,4 +17,5 @@ type ProbeResult struct {
 type Probe interface {
 	Execute() (*ProbeResult, error)
 	Target() string
+	AsJSON() (string, error)
 }

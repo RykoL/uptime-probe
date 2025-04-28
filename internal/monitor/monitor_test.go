@@ -21,6 +21,10 @@ func (p *NoOpProbe) Execute() (*probe.ProbeResult, error) {
 	return &probe.ProbeResult{Succeeded: true}, nil
 }
 
+func (p *NoOpProbe) AsJSON() (string, error) {
+	return "", nil
+}
+
 func TestCreatesMonitorWithName(t *testing.T) {
 	monitor := NewMonitor("Some Monitor", oneMinute, &NoOpProbe{})
 	assert.Equal(t, monitor.Name, "Some Monitor")

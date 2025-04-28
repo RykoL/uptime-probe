@@ -1,6 +1,8 @@
 package probe
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -30,4 +32,14 @@ func (p *HttpProbe) Execute() (*ProbeResult, error) {
 	}
 
 	return &ProbeResult{Succeeded: ExecutionFailed}, nil
+}
+
+func (p *HttpProbe) AsJSON() (string, error) {
+	bytes, err := json.Marshal(p)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal http probe %w", err)
+	}
+
+	return string(bytes), nil
 }
