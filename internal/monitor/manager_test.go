@@ -54,7 +54,7 @@ func TestManager_Init_SetsManagerToInitializedWhenSuccessful(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	m := NewManager(logger, &RepositorySpy{})
 
-	m.Initialize(context.Background())
+	m.Initialize(context.Background(), &config.Config{})
 
 	assert.True(t, m.initialized)
 }
@@ -62,7 +62,7 @@ func TestManager_Init_SetsManagerToInitializedWhenSuccessful(t *testing.T) {
 func TestManager_Init_DoesNotSetManagerToInitializedWhenFailing(t *testing.T) {
 	m := NewManager(logger, &RepositorySpy{shouldReturnError: true})
 
-	err := m.Initialize(context.Background())
+	err := m.Initialize(context.Background(), &config.Config{})
 
 	assert.Error(t, err)
 	assert.False(t, m.initialized)
@@ -82,11 +82,7 @@ func TestManager_ApplyConfig_DoesNotAddMonitorFromConfigIfItAlreadyExistsInTheMa
 		},
 	})
 
-	m.Initialize(context.Background())
-
-	assert.Len(t, m.monitors, 1)
-
-	m.applyConfig(&cfg)
+	m.Initialize(context.Background(), &cfg)
 
 	assert.Len(t, m.monitors, 1)
 }
@@ -105,11 +101,7 @@ func TestManager_ApplyConfig_DoesAddMonitorFromConfigIfMonitorDoesntExistYet(t *
 		},
 	})
 
-	m.Initialize(context.Background())
-
-	assert.Len(t, m.monitors, 1)
-
-	m.applyConfig(&cfg)
+	m.Initialize(context.Background(), &cfg)
 
 	assert.Len(t, m.monitors, 2)
 }
