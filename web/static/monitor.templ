@@ -2,7 +2,7 @@ package static
 
 import "github.com/RykoL/uptime-probe/web/model"
 
-templ Monitor(monitor model.Monitor) {
+templ Monitor(monitor *model.Monitor) {
 	<div class="monitor">
 		<section class="monitor-info">
 			<h2 class="monitor-info-name">{ monitor.Name }</h2>

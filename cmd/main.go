@@ -5,9 +5,7 @@ import (
 	"github.com/RykoL/uptime-probe/config"
 	"github.com/RykoL/uptime-probe/internal/db"
 	"github.com/RykoL/uptime-probe/internal/monitor"
-	"github.com/RykoL/uptime-probe/web/model"
-	"github.com/RykoL/uptime-probe/web/static"
-	"github.com/a-h/templ"
+	"github.com/RykoL/uptime-probe/web"
 	"log"
 	"log/slog"
 	"net/http"
@@ -50,14 +48,9 @@ func main() {
 		panic(err)
 	}
 
-	monitors := []model.Monitor{
-		{Name: "GCP", Status: "Up"},
-		{Name: "AWS", Status: "Up"},
-		{Name: "Azure", Status: "Unknown"},
-		{Name: "StackIt", Status: "Pending"},
-		{Name: "IONOS", Status: "Down"},
-	}
-	http.Handle("/", templ.Handler(static.Index(monitors)))
+	statusPage := web.NewStatusPage(dbpool)
+
+	http.HandleFunc("GET /", statusPage.Monitors)
 	logger.Info("Starting web server on port :8080")
 	http.ListenAndServe(":8080", nil)
 }
