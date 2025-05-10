@@ -18,6 +18,7 @@ const (
 )
 
 type Monitor struct {
+	Id             int
 	Name           string
 	Interval       time.Duration
 	probe          probe.Probe
@@ -27,6 +28,7 @@ type Monitor struct {
 
 func NewMonitor(name string, interval time.Duration, p probe.Probe) *Monitor {
 	return &Monitor{
+		Id:             -1,
 		Name:           name,
 		Interval:       interval,
 		probe:          p,
@@ -34,18 +36,22 @@ func NewMonitor(name string, interval time.Duration, p probe.Probe) *Monitor {
 	}
 }
 
-func (m *Monitor) Start(ctx context.Context) {
+func (m *Monitor) Start(ctx context.Context, repository Repository) {
 	ticker := time.NewTicker(m.Interval)
 	defer ticker.Stop()
 
 	fmt.Printf("Starting monitor %s\n", m.Name)
 
 	m.isRunning = true
+
 loopExit:
 	for {
-		err := m.Probe()
+		err, result := m.Probe()
+
+		err = repository.RecordProbeResult(ctx, m.Id, result)
 
 		if err != nil {
+			fmt.Printf("%s\n", err)
 			return
 		}
 
@@ -70,10 +76,12 @@ func NewMonitorFromRecord(record monitorRecord) (*Monitor, error) {
 		return nil, err
 	}
 
-	m := &Monitor{}
-	m.Name = record.Name
-	m.Interval = record.Interval
-	m.probe = &httpProbe
+	m := &Monitor{
+		Id:       record.Id,
+		Name:     record.Name,
+		Interval: record.Interval,
+		probe:    &httpProbe,
+	}
 	return m, nil
 }
 
@@ -105,20 +113,18 @@ func (s Status) String() string {
 	}
 }
 
-func (m *Monitor) Probe() error {
+func (m *Monitor) Probe() (error, *probe.ProbeResult) {
 
 	fmt.Printf("Executing probe for %s\n", m.Name)
 	result, err := m.probe.Execute()
 
 	if err != nil {
-		return err
+		return err, nil
 	}
 
 	result.TimeStamp = time.Now()
 
-	m.previousProbes = append(m.previousProbes, result)
-
-	return nil
+	return nil, result
 }
 
 func (m *Monitor) GetPreviousProbes() []*probe.ProbeResult {

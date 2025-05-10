@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
@@ -12,7 +13,8 @@ import (
 
 type Repository interface {
 	GetMonitors(ctx context.Context) ([]*Monitor, error)
-	SaveMonitor(ctx context.Context, monitor *Monitor) error
+	SaveMonitor(ctx context.Context, monitor *Monitor) (int, error)
+	RecordProbeResult(ctx context.Context, monitorId int, result *probe.ProbeResult) error
 }
 
 type PostgresRepository struct {
@@ -31,10 +33,21 @@ type monitorRecord struct {
 	Definition string
 }
 
-func (r *PostgresRepository) SaveMonitor(ctx context.Context, monitor *Monitor) error {
+func (r *PostgresRepository) RecordProbeResult(ctx context.Context, monitorId int, result *probe.ProbeResult) error {
+	query := "INSERT INTO uptime.heartbeat(timestamp, monitor_id, success) VALUES ($1, $2, $3)"
+
+	_, err := r.conn.Exec(ctx, query, result.TimeStamp, monitorId, result.Succeeded)
+	if err != nil {
+		return fmt.Errorf("failed to save probe result of monitor %d: %w", monitorId, err)
+	}
+
+	return nil
+}
+
+func (r *PostgresRepository) SaveMonitor(ctx context.Context, monitor *Monitor) (int, error) {
 	tx, err := r.conn.Begin(ctx)
 	if err != nil {
-		return fmt.Errorf("could not begin transaction: %w", err)
+		return -1, fmt.Errorf("could not begin transaction: %w", err)
 	}
 	defer func() {
 		if pErr := tx.Rollback(ctx); pErr != nil && !errors.Is(pErr, pgx.ErrTxClosed) {
@@ -50,7 +63,7 @@ func (r *PostgresRepository) SaveMonitor(ctx context.Context, monitor *Monitor) 
 	err = tx.QueryRow(ctx, monitorQuery, monitor.Interval, monitor.Name).Scan(&monitorId)
 
 	if err != nil {
-		return fmt.Errorf("failed to insert monitor: %w", err)
+		return -1, fmt.Errorf("failed to insert monitor: %w", err)
 	}
 
 	json, _ := monitor.probe.AsJSON()
@@ -59,15 +72,15 @@ func (r *PostgresRepository) SaveMonitor(ctx context.Context, monitor *Monitor) 
 	`
 	_, err = tx.Exec(ctx, probeQuery, json, monitorId)
 	if err != nil {
-		return fmt.Errorf("failed to insert probe: %w", err)
+		return -1, fmt.Errorf("failed to insert probe: %w", err)
 	}
 
 	err = tx.Commit(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		return -1, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	return nil
+	return monitorId, nil
 }
 
 func (r *PostgresRepository) GetMonitors(ctx context.Context) ([]*Monitor, error) {

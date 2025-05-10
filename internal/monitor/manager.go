@@ -40,9 +40,11 @@ func (m *Manager) applyConfig(cfg *config.Config) {
 		newMonitor := NewMonitor(monitorConfig.Name, monitorConfig.Interval, probe.NewHttpProbe(monitorConfig.Url))
 		if !m.monitorExists(newMonitor) {
 			m.log.Info("Found new monitor from config", "name", newMonitor.Name)
-			if err := m.repository.SaveMonitor(context.Background(), newMonitor); err != nil {
+			id, err := m.repository.SaveMonitor(context.Background(), newMonitor)
+			if err != nil {
 				m.log.Error("Failed to persist monitor", "name", newMonitor.Name, "error", err)
 			}
+			newMonitor.Id = id
 			m.monitors = append(m.monitors, newMonitor)
 		}
 	}
@@ -73,7 +75,7 @@ func (m *Manager) Run(ctx context.Context) error {
 
 		go func() {
 			defer wg.Done()
-			monitor.Start(ctx)
+			monitor.Start(ctx, m.repository)
 		}()
 	}
 

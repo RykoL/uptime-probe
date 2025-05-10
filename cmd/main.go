@@ -42,7 +42,7 @@ func main() {
 		log.Fatal("Failed to initialize MonitorManager", err)
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, _ := context.WithCancel(context.Background())
 	err = manager.Run(ctx)
 	defer manager.Stop()
 
@@ -59,6 +59,5 @@ func main() {
 	}
 	http.Handle("/", templ.Handler(static.Index(monitors)))
 	logger.Info("Starting web server on port :8080")
-	cancel()
 	http.ListenAndServe(":8080", nil)
 }
