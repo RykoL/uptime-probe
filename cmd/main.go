@@ -41,7 +41,14 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to initialize MonitorManager", err)
 	}
-	manager.Run()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	err = manager.Run(ctx)
+	defer manager.Stop()
+
+	if err != nil {
+		panic(err)
+	}
 
 	monitors := []model.Monitor{
 		{Name: "GCP", Status: "Up"},
@@ -51,6 +58,7 @@ func main() {
 		{Name: "IONOS", Status: "Down"},
 	}
 	http.Handle("/", templ.Handler(static.Index(monitors)))
-
+	logger.Info("Starting web server on port :8080")
+	cancel()
 	http.ListenAndServe(":8080", nil)
 }

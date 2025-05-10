@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"context"
 	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -52,38 +53,6 @@ func TestReturnsUnknownWhenNoProbeHasExecuted(t *testing.T) {
 	assert.Equal(t, Status(StatusUnknown), monitor.Status())
 }
 
-func TestReturnsTrueIfMonitorHasNotExecutedAProbeYet(t *testing.T) {
-	m := NewMonitor("", oneMinute, &NoOpProbe{})
-
-	assert.Equal(t, true, m.ShouldExecuteProbe())
-}
-
-func TestReturnsTrueIfLastExecutionLiesBehindInterval(t *testing.T) {
-	lastExecution := time.Now().Add(-oneMinute)
-	m := Monitor{
-		Name:     "asdasd",
-		Interval: oneSecond,
-		previousProbes: []*probe.ProbeResult{
-			{Succeeded: true, TimeStamp: lastExecution},
-		},
-	}
-
-	assert.Equal(t, true, m.ShouldExecuteProbe())
-}
-
-func TestReturnsFalseIfLastExecutionLiesAfterInterval(t *testing.T) {
-	lastExecution := time.Now().Add(-oneSecond)
-	m := Monitor{
-		Name:     "asdasd",
-		Interval: oneMinute,
-		previousProbes: []*probe.ProbeResult{
-			{Succeeded: true, TimeStamp: lastExecution},
-		},
-	}
-
-	assert.Equal(t, false, m.ShouldExecuteProbe())
-}
-
 func TestMonitor_Probe_StoresProbeResult(t *testing.T) {
 	m := NewMonitor("", oneMinute, &NoOpProbe{})
 
@@ -92,16 +61,6 @@ func TestMonitor_Probe_StoresProbeResult(t *testing.T) {
 	m.Probe()
 
 	assert.NotEmpty(t, m.GetPreviousProbes())
-}
-
-func TestMonitor_ShouldExecuteProbe_ReturnsFalseDirectlyAfterExecuting(t *testing.T) {
-	m := NewMonitor("", oneMinute, &NoOpProbe{})
-
-	assert.True(t, m.ShouldExecuteProbe())
-
-	m.Probe()
-
-	assert.False(t, m.ShouldExecuteProbe())
 }
 
 func TestNewMonitorFromRecord_CorrectlyMapsFields(t *testing.T) {
@@ -132,4 +91,18 @@ func TestMonitor_IsSameAs_ReturnsFalseWhenBothMonitorsHaveDifferentAttributes(t 
 	m2 := NewMonitor("SecondMonitor", oneMinute, probe.NewHttpProbe("https://api.mytest.foo"))
 
 	assert.False(t, m1.Equals(m2))
+}
+
+func TestMonitor_Start_CancelExecutionIfParentContextIsCanceled(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	m := NewMonitor("FirstMonitor", oneMinute, &NoOpProbe{})
+
+	go func() {
+		m.Start(ctx)
+		assert.True(t, m.isRunning)
+	}()
+
+	cancel()
+	assert.False(t, m.isRunning)
 }

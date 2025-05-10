@@ -6,6 +6,7 @@ import (
 	"github.com/RykoL/uptime-probe/config"
 	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"log/slog"
+	"sync"
 )
 
 type Manager struct {
@@ -13,6 +14,7 @@ type Manager struct {
 	log         *slog.Logger
 	repository  Repository
 	initialized bool
+	wg          *sync.WaitGroup
 }
 
 func NewManager(logger *slog.Logger, repository Repository) Manager {
@@ -57,23 +59,27 @@ func (m *Manager) monitorExists(monitor *Monitor) bool {
 	return false
 }
 
-func (m *Manager) Run() error {
+func (m *Manager) Run(ctx context.Context) error {
 
 	if !m.initialized {
 		return fmt.Errorf("manager is not initialized yet. Call Initialize() before running")
 	}
 
-	for {
-		for _, monitor := range m.monitors {
+	var wg sync.WaitGroup
 
-			if !monitor.ShouldExecuteProbe() {
-				continue
-			}
+	for _, monitor := range m.monitors {
 
-			m.log.Info("Executing probe", "monitor_name", monitor.Name)
-			if err := monitor.Probe(); err != nil {
-				m.log.Warn(err.Error(), "monitor_name", monitor.Name)
-			}
-		}
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			monitor.Start(ctx)
+		}()
 	}
+
+	return nil
+}
+
+func (m *Manager) Stop() {
+	m.wg.Wait()
 }

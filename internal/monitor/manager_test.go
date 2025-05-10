@@ -45,7 +45,7 @@ func TestCreatesMonitorForEveryEntryInConfiguration(t *testing.T) {
 func TestManager_Run_ReturnsErrorIfManagerIsNotInitialized(t *testing.T) {
 	m := NewManager(nil, nil)
 
-	err := m.Run()
+	err := m.Run(context.Background())
 
 	assert.Error(t, err, fmt.Errorf("manager is not initialized yet. Call Initialize() before running"))
 }

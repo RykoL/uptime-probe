@@ -1,7 +1,9 @@
 package monitor
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"time"
 )
@@ -20,6 +22,7 @@ type Monitor struct {
 	Interval       time.Duration
 	probe          probe.Probe
 	previousProbes []*probe.ProbeResult
+	isRunning      bool
 }
 
 func NewMonitor(name string, interval time.Duration, p probe.Probe) *Monitor {
@@ -29,6 +32,32 @@ func NewMonitor(name string, interval time.Duration, p probe.Probe) *Monitor {
 		probe:          p,
 		previousProbes: make([]*probe.ProbeResult, 0),
 	}
+}
+
+func (m *Monitor) Start(ctx context.Context) {
+	ticker := time.NewTicker(m.Interval)
+	defer ticker.Stop()
+
+	fmt.Printf("Starting monitor %s\n", m.Name)
+
+	m.isRunning = true
+loopExit:
+	for {
+		err := m.Probe()
+
+		if err != nil {
+			return
+		}
+
+		select {
+		case <-ticker.C:
+		case <-ctx.Done():
+			break loopExit
+		}
+	}
+
+	m.isRunning = false
+	fmt.Printf("Monitor %s stopped \n", m.Name)
 }
 
 func NewMonitorFromRecord(record monitorRecord) (*Monitor, error) {
@@ -76,22 +105,9 @@ func (s Status) String() string {
 	}
 }
 
-func (m *Monitor) ShouldExecuteProbe() bool {
-	if len(m.previousProbes) == 0 {
-		return true
-	}
-
-	lastExecution := m.previousProbes[len(m.previousProbes)-1].TimeStamp
-
-	if time.Now().Add(-m.Interval).After(lastExecution) {
-		return true
-	}
-
-	return false
-}
-
 func (m *Monitor) Probe() error {
 
+	fmt.Printf("Executing probe for %s\n", m.Name)
 	result, err := m.probe.Execute()
 
 	if err != nil {
