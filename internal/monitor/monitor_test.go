@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 	"testing"
 	"time"
 )
@@ -29,38 +30,6 @@ func (p *NoOpProbe) AsJSON() (string, error) {
 func TestCreatesMonitorWithName(t *testing.T) {
 	monitor := NewMonitor("Some Monitor", oneMinute, &NoOpProbe{})
 	assert.Equal(t, monitor.Name, "Some Monitor")
-}
-
-func TestReturnsThatMonitorIsUpWhenLatestResultIsSuccessful(t *testing.T) {
-	monitor := Monitor{Name: "", previousProbes: []*probe.ProbeResult{
-		{Succeeded: probe.ExecutionSucceeded},
-	}}
-
-	assert.Equal(t, Status(StatusUp), monitor.Status())
-}
-
-func TestReturnsDownWhenLastResultIsAFailure(t *testing.T) {
-	monitor := Monitor{Name: "", previousProbes: []*probe.ProbeResult{
-		{Succeeded: probe.ExecutionFailed},
-	}}
-
-	assert.Equal(t, Status(StatusDown), monitor.Status())
-}
-
-func TestReturnsUnknownWhenNoProbeHasExecuted(t *testing.T) {
-	monitor := NewMonitor("Some", oneMinute, &NoOpProbe{})
-
-	assert.Equal(t, Status(StatusUnknown), monitor.Status())
-}
-
-func TestMonitor_Probe_StoresProbeResult(t *testing.T) {
-	m := NewMonitor("", oneMinute, &NoOpProbe{})
-
-	assert.Empty(t, m.GetPreviousProbes())
-
-	m.Probe()
-
-	assert.NotEmpty(t, m.GetPreviousProbes())
 }
 
 func TestNewMonitorFromRecord_CorrectlyMapsFields(t *testing.T) {
@@ -96,10 +65,16 @@ func TestMonitor_IsSameAs_ReturnsFalseWhenBothMonitorsHaveDifferentAttributes(t 
 func TestMonitor_Start_CancelExecutionIfParentContextIsCanceled(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepository := NewMockRepository(ctrl)
+
 	m := NewMonitor("FirstMonitor", oneMinute, &NoOpProbe{})
 
 	go func() {
-		m.Start(ctx)
+		m.Start(ctx, mockRepository)
 		assert.True(t, m.isRunning)
 	}()
 

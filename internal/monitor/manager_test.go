@@ -6,37 +6,27 @@ import (
 	"github.com/RykoL/uptime-probe/config"
 	"github.com/RykoL/uptime-probe/internal/monitor/probe"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 	"log/slog"
 	"os"
 	"testing"
 )
 
-type RepositorySpy struct {
-	monitors          []*Monitor
-	shouldReturnError bool
-	CalledSave        bool
-}
-
 var logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-func (r *RepositorySpy) GetMonitors(ctx context.Context) ([]*Monitor, error) {
-	if r.shouldReturnError {
-		return nil, fmt.Errorf("")
-	}
-	return r.monitors, nil
-}
-
-func (r *RepositorySpy) SaveMonitor(ctx context.Context, monitor *Monitor) error {
-	r.CalledSave = true
-	return nil
-}
+var httpProbe = probe.NewHttpProbe("http://localhost:8080")
 
 func TestCreatesMonitorForEveryEntryInConfiguration(t *testing.T) {
 	cfg := config.Config{Monitors: []*config.MonitorConfig{
 		{Name: "TestMonitor", Url: "http://localhost:8080"},
 	}}
 
-	m := NewManager(logger, &RepositorySpy{})
+	ctrl := gomock.NewController(t)
+	repo := NewMockRepository(ctrl)
+
+	repo.EXPECT().SaveMonitor(gomock.Any(), gomock.Any()).Times(1)
+
+	m := NewManager(logger, repo)
 	m.applyConfig(&cfg)
 
 	assert.Equal(t, 1, len(m.monitors))
@@ -52,7 +42,13 @@ func TestManager_Run_ReturnsErrorIfManagerIsNotInitialized(t *testing.T) {
 
 func TestManager_Init_SetsManagerToInitializedWhenSuccessful(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	m := NewManager(logger, &RepositorySpy{})
+
+	ctrl := gomock.NewController(t)
+	repo := NewMockRepository(ctrl)
+
+	repo.EXPECT().GetMonitors(gomock.Any()).Return(make([]*Monitor, 0), nil)
+
+	m := NewManager(logger, repo)
 
 	m.Initialize(context.Background(), &config.Config{})
 
@@ -60,7 +56,12 @@ func TestManager_Init_SetsManagerToInitializedWhenSuccessful(t *testing.T) {
 }
 
 func TestManager_Init_DoesNotSetManagerToInitializedWhenFailing(t *testing.T) {
-	m := NewManager(logger, &RepositorySpy{shouldReturnError: true})
+	ctrl := gomock.NewController(t)
+	repo := NewMockRepository(ctrl)
+
+	repo.EXPECT().GetMonitors(gomock.Any()).Return(make([]*Monitor, 0), fmt.Errorf(""))
+
+	m := NewManager(logger, repo)
 
 	err := m.Initialize(context.Background(), &config.Config{})
 
@@ -73,14 +74,16 @@ func TestManager_ApplyConfig_DoesNotAddMonitorFromConfigIfItAlreadyExistsInTheMa
 		{Name: "TestMonitor", Url: "http://localhost:8080", Interval: oneSecond},
 	}}
 
-	httpProbe := probe.NewHttpProbe("http://localhost:8080")
+	ctrl := gomock.NewController(t)
+	repo := NewMockRepository(ctrl)
 
-	m := NewManager(logger, &RepositorySpy{
-		shouldReturnError: false,
-		monitors: []*Monitor{
-			NewMonitor("TestMonitor", oneSecond, httpProbe),
-		},
-	})
+	existingMonitor := []*Monitor{
+		NewMonitor("TestMonitor", oneSecond, httpProbe),
+	}
+
+	repo.EXPECT().GetMonitors(gomock.Any()).Return(existingMonitor, nil)
+
+	m := NewManager(logger, repo)
 
 	m.Initialize(context.Background(), &cfg)
 
@@ -92,14 +95,17 @@ func TestManager_ApplyConfig_DoesAddMonitorFromConfigIfMonitorDoesntExistYet(t *
 		{Name: "TestMonitor", Url: "http://localhost:8080", Interval: oneSecond},
 	}}
 
-	httpProbe := probe.NewHttpProbe("http://localhost:3000")
+	ctrl := gomock.NewController(t)
+	repo := NewMockRepository(ctrl)
 
-	m := NewManager(logger, &RepositorySpy{
-		shouldReturnError: false,
-		monitors: []*Monitor{
-			NewMonitor("MyNewAndDifferentMonitor", oneSecond, httpProbe),
-		},
-	})
+	existingMonitor := []*Monitor{
+		NewMonitor("MyNewAndDifferentMonitor", oneSecond, httpProbe),
+	}
+
+	repo.EXPECT().GetMonitors(gomock.Any()).Return(existingMonitor, nil)
+	repo.EXPECT().SaveMonitor(gomock.Any(), gomock.Any()).Times(1)
+
+	m := NewManager(logger, repo)
 
 	m.Initialize(context.Background(), &cfg)
 
@@ -110,13 +116,14 @@ func TestManager_ApplyConfig_PersistsNewMonitors(t *testing.T) {
 	cfg := config.Config{Monitors: []*config.MonitorConfig{
 		{Name: "TestMonitor", Url: "http://localhost:8080", Interval: oneSecond},
 	}}
-	repo := &RepositorySpy{
-		shouldReturnError: false,
-		monitors:          make([]*Monitor, 0),
-	}
+
+	ctrl := gomock.NewController(t)
+	repo := NewMockRepository(ctrl)
+
+	repo.EXPECT().SaveMonitor(gomock.Any(), gomock.Any()).Times(1)
+
 	m := NewManager(logger, repo)
 
 	m.applyConfig(&cfg)
 
-	assert.True(t, repo.CalledSave)
 }

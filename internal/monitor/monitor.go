@@ -8,15 +8,6 @@ import (
 	"time"
 )
 
-type Status int
-
-const (
-	StatusDown = iota
-	StatusUp
-	StatusPending
-	StatusUnknown
-)
-
 type Monitor struct {
 	Id             int
 	Name           string
@@ -85,34 +76,6 @@ func NewMonitorFromRecord(record monitorRecord) (*Monitor, error) {
 	return m, nil
 }
 
-func (m *Monitor) Status() Status {
-
-	if len(m.previousProbes) == 0 {
-		return StatusUnknown
-	}
-
-	if m.previousProbes[len(m.previousProbes)-1].Succeeded == probe.ExecutionSucceeded {
-		return StatusUp
-	}
-
-	return StatusDown
-}
-
-func (s Status) String() string {
-	switch s {
-	case StatusUp:
-		return "Up"
-	case StatusUnknown:
-		return "Unknown"
-	case StatusPending:
-		return "Pending"
-	case StatusDown:
-		return "Down"
-	default:
-		return "Error: This status doesn't exists"
-	}
-}
-
 func (m *Monitor) Probe() (error, *probe.ProbeResult) {
 
 	fmt.Printf("Executing probe for %s\n", m.Name)
@@ -125,10 +88,6 @@ func (m *Monitor) Probe() (error, *probe.ProbeResult) {
 	result.TimeStamp = time.Now()
 
 	return nil, result
-}
-
-func (m *Monitor) GetPreviousProbes() []*probe.ProbeResult {
-	return m.previousProbes
 }
 
 func (m *Monitor) Equals(other *Monitor) bool {
