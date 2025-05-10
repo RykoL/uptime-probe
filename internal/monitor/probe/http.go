@@ -22,7 +22,7 @@ func (p *HttpProbe) Execute() (*ProbeResult, error) {
 	resp, err := http.Get(p.Url)
 
 	if err != nil {
-		return nil, err
+		return &ProbeResult{Succeeded: ExecutionFailed}, nil
 	}
 
 	defer resp.Body.Close()

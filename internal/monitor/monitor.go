@@ -39,6 +39,11 @@ loopExit:
 	for {
 		err, result := m.Probe()
 
+		if err != nil {
+			fmt.Printf("%s\n", err)
+			return
+		}
+
 		err = repository.RecordProbeResult(ctx, m.Id, result)
 
 		if err != nil {

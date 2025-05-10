@@ -47,3 +47,14 @@ func TestReturnsFailureOnNonSuccessfulRequest(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, result.Succeeded, probe.ExecutionFailed)
 }
+
+func TestHttpProbe_Execute_ReturnsFailureIfTargetCantBeReach(t *testing.T) {
+	targetUrl := "http://localhost:1234456" + "/failure"
+
+	httpProbe := probe.NewHttpProbe(targetUrl)
+
+	result, err := httpProbe.Execute()
+
+	assert.Nil(t, err)
+	assert.Equal(t, result.Succeeded, probe.ExecutionFailed)
+}
