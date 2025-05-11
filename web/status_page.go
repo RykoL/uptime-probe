@@ -38,7 +38,7 @@ func getMonitors(ctx context.Context, conn *pgxpool.Pool) ([]*model.Monitor, err
     	bucket_start,
     	is_up
 	FROM RankedHeartbeats
-	WHERE rn <= 31
+	WHERE rn <= 30
 	ORDER BY monitor_id, bucket_start ASC`,
 	)
 
