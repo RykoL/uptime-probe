@@ -8,25 +8,27 @@ templ Monitor(monitor *model.Monitor) {
 			<h2 class="monitor-info-name">{ monitor.Name }</h2>
 			<div class="monitor-info-status">
 				Status:
-				@MonitorStatus(monitor.Status)
+				@MonitorStatus(monitor.Status())
 			</div>
 		</section>
 		<section class="probe-status">
 			<div class="probe-status-display">
-				for i := 1; i <= 30; i++ {
-					@ProbeStatusPill(monitor.Status)
+				if len(monitor.Results) > 0 {
+					for _, probeResult := range monitor.Results {
+						@ProbeStatusPill(probeResult.Status())
+					}
 				}
 			</div>
 			<div class="probe-status-time-info">
-			    <span>30min ago</span>
-			    <span>now</span>
+				<span>30min ago</span>
+				<span>now</span>
 			</div>
 		</section>
 	</div>
 }
 
 templ ProbeStatusPill(status string) {
-	<div class={"probe-status-pill", getStatusPageBackground(status)}></div>
+	<div class={ "probe-status-pill", getStatusPageBackground(status) }></div>
 }
 
 templ MonitorStatus(status string) {

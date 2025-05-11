@@ -48,7 +48,7 @@ func main() {
 		panic(err)
 	}
 
-	statusPage := web.NewStatusPage(dbpool)
+	statusPage := web.NewStatusPage(dbpool, logger)
 
 	http.HandleFunc("GET /", statusPage.Monitors)
 	logger.Info("Starting web server on port :8080")

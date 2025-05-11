@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-var m = &model.Monitor{Name: "My Monitor", Status: "Up"}
+var m = &model.Monitor{Name: "My Monitor"}
 
 func TestHeader(t *testing.T) {
 	// Pipe the rendered template into goquery.
