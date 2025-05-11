@@ -31,8 +31,6 @@ func (m *Monitor) Start(ctx context.Context, repository Repository) {
 	ticker := time.NewTicker(m.Interval)
 	defer ticker.Stop()
 
-	fmt.Printf("Starting monitor %s\n", m.Name)
-
 	m.isRunning = true
 
 loopExit:
@@ -83,7 +81,6 @@ func NewMonitorFromRecord(record monitorRecord) (*Monitor, error) {
 
 func (m *Monitor) Probe() (error, *probe.ProbeResult) {
 
-	fmt.Printf("Executing probe for %s\n", m.Name)
 	result, err := m.probe.Execute()
 
 	if err != nil {
