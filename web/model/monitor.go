@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"slices"
+	"time"
+)
 
 type Monitor struct {
 	Id      int
@@ -17,6 +20,18 @@ func (m *Monitor) Status() string {
 	}
 
 	return "Down"
+}
+
+func (m *Monitor) OldestProbeResult() ProbeResult {
+	return slices.MinFunc(m.Results, func(a, b ProbeResult) int {
+		return a.Timestamp.Compare(b.Timestamp)
+	})
+}
+
+func (m *Monitor) LatestProbeResult() ProbeResult {
+	return slices.MaxFunc(m.Results, func(a, b ProbeResult) int {
+		return a.Timestamp.Compare(b.Timestamp)
+	})
 }
 
 type ProbeResult struct {

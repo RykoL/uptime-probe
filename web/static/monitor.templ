@@ -1,6 +1,28 @@
 package static
 
-import "github.com/RykoL/uptime-probe/web/model"
+import (
+	"fmt"
+	"github.com/RykoL/uptime-probe/web/model"
+	"time"
+)
+
+func FormatRelativeTime(base time.Time, other time.Time) string {
+	diff := base.Sub(other)
+
+	if diff < time.Minute {
+		return fmt.Sprintf("%dm ago", int(diff.Seconds()/60))
+	} else if diff < time.Hour {
+		return fmt.Sprintf("%dh ago", int(diff.Minutes()/60))
+	} else if diff < 24*time.Hour {
+		return fmt.Sprintf("%dh ago", int(diff.Hours()))
+	} else if diff < 30*24*time.Hour { // Up to 30 days
+		return fmt.Sprintf("%dd ago", int(diff.Hours()/24))
+	} else if diff < 365*24*time.Hour {
+		return fmt.Sprintf("%dm ago", int(diff.Hours()/24/30)) // returns months
+	} else {
+		return fmt.Sprintf("%dy ago", int(diff.Hours()/24/365)) // returns years
+	}
+}
 
 templ Monitor(monitor *model.Monitor) {
 	<div class="monitor">
@@ -20,7 +42,7 @@ templ Monitor(monitor *model.Monitor) {
 				}
 			</div>
 			<div class="probe-status-time-info">
-				<span>30min ago</span>
+				<span>{ FormatRelativeTime(monitor.LatestProbeResult().Timestamp, monitor.OldestProbeResult().Timestamp) }</span>
 				<span>now</span>
 			</div>
 		</section>
