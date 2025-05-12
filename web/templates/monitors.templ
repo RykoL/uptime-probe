@@ -4,7 +4,11 @@ import "github.com/RykoL/uptime-probe/web/model"
 
 templ Index(monitors []*model.Monitor) {
 	@Layout() {
-		<main>
+		<main
+		    data-hx-get="/"
+		    data-hx-trigger="every 30s"
+		    data-hx-swap="outerHTML"
+		    >
 			<h1 id="monitors-heading">Monitors</h1>
 			if len(monitors) == 0 {
 				<p>No monitors created yet.</p>

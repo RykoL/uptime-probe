@@ -3,7 +3,7 @@ package web
 import (
 	"context"
 	"github.com/RykoL/uptime-probe/web/model"
-	"github.com/RykoL/uptime-probe/web/static"
+	"github.com/RykoL/uptime-probe/web/templates"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
 	"net/http"

@@ -6,6 +6,7 @@ import (
 	"github.com/RykoL/uptime-probe/internal/db"
 	"github.com/RykoL/uptime-probe/internal/monitor"
 	"github.com/RykoL/uptime-probe/web"
+	"github.com/RykoL/uptime-probe/web/static"
 	"log"
 	"log/slog"
 	"net/http"
@@ -56,6 +57,7 @@ func main() {
 
 	statusPage := web.NewStatusPage(dbpool, logger)
 
+	http.Handle("GET /static/", http.StripPrefix("/static/", static.NewEmbeddedFileHandler(static.Assets, http.NotFoundHandler())))
 	http.HandleFunc("GET /", statusPage.Monitors)
 	logger.Info("Starting web server on port :8080")
 	http.ListenAndServe(":8080", nil)
