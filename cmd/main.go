@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 )
 
 func main() {
@@ -18,7 +19,12 @@ func main() {
 	if len(os.Args) < 2 {
 		logger.Error("Missing required parameter config")
 		os.Exit(1)
+
 	}
+
+	location, _ := time.LoadLocation("UTC")
+	time.Local = location
+
 	cfg, err := config.LoadFromFile(os.Args[1])
 
 	if err != nil {

@@ -34,6 +34,10 @@ func (m *Monitor) LatestProbeResult() ProbeResult {
 	})
 }
 
+func (m *Monitor) HasResults() bool {
+	return len(m.Results) > 0
+}
+
 type ProbeResult struct {
 	Timestamp time.Time
 	Success   bool
